@@ -191,12 +191,17 @@ curl --data "host=google.com&hmac=ad1663b82d5bdb2e1938c368f627593f836f81bcee055f
     echo passthru("host ".$_POST['host']);
 #+END_SRC
 
-#+ATTR_REVEAL: :frag (appear appear appear appear appear appear)
+#+ATTR_REVEAL: :frag appear
 - [[https://www.php.net/manual/en/function.getenv.php][~getenv~]]
+#+ATTR_REVEAL: :frag appear
 - [[https://www.php.net/manual/en/function.isset.php][~isset~]]
+#+ATTR_REVEAL: :frag appear
 - [[https://www.php.net/manual/en/reserved.variables.post.php][~$_POST~]]
+#+ATTR_REVEAL: :frag appear
 - [[https://www.php.net/manual/en/function.hash-hmac.php][~hash_hmac~]]
+#+ATTR_REVEAL: :frag appear
 - [[https://www.php.net/manual/en/function.header.php][~header~]]
+#+ATTR_REVEAL: :frag appear
 - [[https://www.php.net/manual/en/function.passthru.php][~passthru~]]
 
 ** Step 2: Bash Injection
@@ -372,8 +377,6 @@ Set strict error reporting level: [[https://www.php.net/manual/en/function.error
 #+BEGIN_SRC php
 error_reporting(E_ALL | E_STRICT);
 #+END_SRC
-
-** Understand the change of types of variables
 * What can you do to code that isn't yours?
 #+BEGIN_NOTES
 Include mention of DMs
@@ -391,6 +394,7 @@ Maybe...
 #+ATTR_REVEAL: :frag appear
 We need to know how to fix problems, not just identify and exploit them!
 
+* Questions?
 * Club exercise!
 ** Situation description
 #+ATTR_REVEAL: :frag appear
