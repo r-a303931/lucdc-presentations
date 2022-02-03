@@ -15,7 +15,9 @@ const server = http.createServer((req, res) => {
       // Each user has a folder, go into that folder and get their user.json file
       // and return the text
       const id = url.searchParams.get("userId");
-      const userFile = url.searchParams.get("file") ?? "user.json";
+      const userFileInput = url.searchParams.get("file") ?? "user.json";
+      const userFileParts = userFileInput.split("/");
+      const userFile = userFileParts[userFileParts.length - 1];
 
       const filePath = path.resolve("/users", id, userFile);
 
