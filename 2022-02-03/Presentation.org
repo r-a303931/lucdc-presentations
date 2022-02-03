@@ -347,6 +347,23 @@ Learn the ins and outs of whatever language you are using
 Find a place to listen to news about your language of choice
 
 * How can we secure Example 1?
+** Source code:
+#+BEGIN_SRC c
+#include <stdio.h>
+// It's a surprise tool that will help us later...
+void shell() {
+    printf("Suspicious function here...\n");
+}
+void get_name() {
+    printf("What is your name?\n");
+    char buffer[20];
+    scanf("%s", buffer);
+    printf("Hello, %s!\n", buffer);
+}
+int main() {
+    get_name();
+}
+#+END_SRC
 ** Don't provide the option to overflow the buffer: fgets(3)
 ** Compare the following
 #+ATTR_REVEAL: :frag appear
@@ -368,6 +385,23 @@ What's the main difference?
 DuckDuckGo and Reddit
 
 * How can we secure Example 2?
+** Source code: Authentication and execution
+#+BEGIN_SRC php
+    $secret = getenv("SECRET");
+
+    if (isset($_POST['nonce']))
+        $secret = hash_hmac('sha256', $_POST['nonce'], $secret);
+
+    $hmac = hash_hmac('sha256', $_POST['host'], $secret);
+
+    if ($hmac !== $_POST['hmac']) {
+        header('HTTP/1.0 403 Forbidden');
+        exit;
+    }
+
+    echo passthru("host ".$_POST['host']);
+#+END_SRC
+
 ** Do not trust the types of your variables in weakly typed languages!
 For PHP: [[https://www.php.net/manual/en/ref.var.php]]
 ** Enable strict error handling
