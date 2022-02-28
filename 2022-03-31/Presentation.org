@@ -1,0 +1,68 @@
+#+TITLE: LU CDC: Docker
+#+OPTIONS: toc:nil
+#+AUTHOR: Andrew Rioux
+#+EMAIL: arioux@liberty.edu
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_PLUGINS: (notes)
+#+REVEAL_DEFAULT_SLIDE_BACKGROUND: ../common/background.png
+#+REVEAL_EXTRA_CSS: ../common/theme.css
+#+REVEAL_INIT_OPTIONS: transition: 'none'
+#+REVEAL_TITLE_SLIDE_BACKGROUND: ../common/background.png
+#+REVEAL_TITLE_SLIDE: <h1>%t</h1>
+#+REVEAL_TITLE_SLIDE: %a (%e)
+
+* About me
+#+ATTR_REVEAL: frag (appear appear appear appear)
+- Andrew Rioux
+- CS: Software Engineering
+- Software Engineer for US Navy
+- LU CDC Vice President
+- Discord: Andrew#3967
+
+* Presentation information
+** Located at the following git repository
+[[https://github.com/r-a303931/lucdc-presentations][https://github.com/r-a303931/lucdc-presentations]]
+
+** Please download Docker!
+- Windows: [[https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe][https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe]]
+- Linux: [[https://docs.docker.com/engine/install/][https://docs.docker.com/engine/install/]] (under 'Server')
+
+* What we will be going over
+#+ATTR_REVEAL: :frag (appear appear appear appear)
+- What is Docker
+- What can we use Docker for
+- Why is this important
+- Implications
+
+* What is Docker?
+#+ATTR_REVEAL: :frag (appear appear appear appear)
+- It is a way of running programs
+- It's like a virtual machine
+- It's like a program running on your computer
+- It is neither!
+
+** What does it look like to run programs?
+#+ATTR_REVEAL: :frag appear
+First... some terminonlogy
+
+#+ATTR_REVEAL: :frag appear
+#+BEGIN_SRC cpp
+class Image
+{
+public:
+    void start();
+private:
+    std::string id;
+};
+
+int main()
+{
+    Image container;
+    container.start();
+}
+#+END_SRC
+
+#+ATTR_REVEAL: :frag appear
+We have a template image (~class Image~)...
+#+ATTR_REVEAL: :frag appear
+...and we make a container from the template and start it
