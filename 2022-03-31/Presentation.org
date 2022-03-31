@@ -12,7 +12,7 @@
 #+REVEAL_TITLE_SLIDE: %a (%e)
 
 * About me
-#+ATTR_REVEAL: frag (appear appear appear appear)
+#+ATTR_REVEAL: :frag (appear appear appear appear appear)
 - Andrew Rioux
 - CS: Software Engineering
 - Software Engineer for US Navy
@@ -27,42 +27,341 @@
 - Windows: [[https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe][https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe]]
 - Linux: [[https://docs.docker.com/engine/install/][https://docs.docker.com/engine/install/]] (under 'Server')
 
+* I love Docker!
+#+ATTR_REVEAL: :frag appear
+If you know of my love for Vim... my love for Docker eclipses my love for Vim
+
+#+ATTR_REVEAL: :frag appear
+Just like Vim has made me rethink how I use my keyboard... Docker has made me rethink how I run programs!
+
+* I have used Docker to:
+#+ATTR_REVEAL: :frag (appear appear appear appear appear)
+- Run regular web services, its intended use
+- Run compilers and standardize development environments
+- Run graphical applications
+- Run graphical applications on Windows
+- Run a graphical application that was embedded in another graphical application over the network
+
 * What we will be going over
-#+ATTR_REVEAL: :frag (appear appear appear appear)
+#+ATTR_REVEAL: :frag (appear appear appear appear appear)
+- What is containerization
 - What is Docker
-- What can we use Docker for
+- What can we use containerization for
 - Why is this important
 - Implications
 
-* What is Docker?
-#+ATTR_REVEAL: :frag (appear appear appear appear)
-- It is a way of running programs
-- It's like a virtual machine
-- It's like a program running on your computer
-- It is neither!
-
-** What does it look like to run programs?
+* Docker is like Sudoku
 #+ATTR_REVEAL: :frag appear
-First... some terminonlogy
+[[file:images/sudoku.png]]
 
+* Problem:
 #+ATTR_REVEAL: :frag appear
+There are several problems with running computer programs that you may or may not have encountered
+
+#+ATTR_REVEAL: :frag (appear appear appear)
+- Ensuring consistency of software environments (enforcing standards)
+- Isolating program execution
+- Trust
+
+* What is containerization?
+#+ATTR_REVEAL: :frag appear
+What is a program?
+
+** Containerization can be related to a regular program
+You have a binary file and can run the binary file
+
+#+ATTR_REVEAL: :frag (appear appear)
+- Image: the binary file
+- Container: the running program
+
+** I only know C++! How do I make images?
+Let's start with Hello World
+
+*** Hello World C++
+Let's start with Hello World in C++...
+
 #+BEGIN_SRC cpp
-class Image
-{
-public:
-    void start();
-private:
-    std::string id;
-};
+#include <iostream>
 
-int main()
-{
-    Image container;
-    container.start();
+int main() {
+    std::cout << "Hello world!" << std::endl;
 }
 #+END_SRC
 
 #+ATTR_REVEAL: :frag appear
-We have a template image (~class Image~)...
+We can compile this by running ~g++ helloworld.cpp~ on Linux
+
 #+ATTR_REVEAL: :frag appear
-...and we make a container from the template and start it
+[[file:examples/01-basic-cpp]]
+
+*** What does Docker need?
+Docker runs like your Linux terminal
+
+#+ATTR_REVEAL: :frag appear
+We can convert the ideas for running something in our shell to running it in Docker, so first let's translate "Hello World!" to Bash
+
+#+ATTR_REVEAL: :frag appear
+#+BEGIN_SRC bash
+echo "Hello world!"
+#+END_SRC
+
+#+ATTR_REVEAL: :frag appear
+[[file:examples/02-bash-basic]]
+
+*** So, let's write our Dockerfile
+#+BEGIN_SRC dockerfile
+FROM ubuntu
+
+CMD echo "Hello world!"
+#+END_SRC
+
+#+ATTR_REVEAL: :frag appear
+[[file:examples/03-dockerfile-basic/]]
+
+#+ATTR_REVEAL: :frag appear
+We can build it with ~docker build -t hello-world .~
+
+#+ATTR_REVEAL: :frag appear
+Where did it go?
+
+#+ATTR_REVEAL: :frag appear
+We can run it with ~docker run hello-world~
+*** So... what did this do?
+#+ATTR_REVEAL: :frag appear
+That's the what, but what about the 'why' and 'how'?
+** Stepping back for a moment...
+How is it that Linux computers /work/? How do they boot?
+
+#+ATTR_REVEAL: :frag appear
+Condensed version: a bootloader runs the kernel, and the kernel runs a program, the init program
+
+#+ATTR_REVEAL: :frag appear
+What is the init program?
+
+#+ATTR_REVEAL: :frag appear
+What happens if you replace this init process with something else, something trivial like ~echo Hello World!~?
+
+** Containers are like Virtual Machines
+#+ATTR_REVEAL: :frag appear
+We just skip loading the kernel and replace the init program!
+
+*** But virtual machines are really secure!
+Each virtual machine gets its own:
+#+ATTR_REVEAL: :frag (appear appear appear appear)
+- Network configuration
+- File system
+- Running programs
+- Hostname
+
+#+ATTR_REVEAL: :frag appear
+Can we emulate anything like that for other programs?
+Something more... performant?
+
+*** Yes!
+*** Enter Containers and Namespaces
+#+ATTR_REVEAL: :frag appear
+What kind of containing can we do with the Linux kernel?
+
+#+ATTR_REVEAL: :frag appear
+The Linux kernel has the following namespaces:
+
+#+ATTR_REVEAL: :frag (appear appear appear appear appear appear appear appear)
+- Mount (file systems)
+- Process ID (running programs)
+- Network
+- Interprocess Communication (IPC)
+- UTS (hostname)
+- User ID
+- Control group
+- Time
+
+*** Containers are ephemeral
+#+ATTR_REVEAL: :frag appear
+/No changes you make are saved/
+
+** That's cool... but virtualization has a performance penalty
+Yes.
+
+#+ATTR_REVEAL: :frag appear
+However...
+
+#+ATTR_REVEAL: :frag appear
+Containers aren't virtualization!
+
+*** Simple comparison: Ubuntu container vs Arch VM
+** Programs running in Linux containers exist on their host systems
+They are running directly on the host computer, just limited
+** Do we need Docker in order to manage containers?
+#+ATTR_REVEAL: :frag appear
+Actually, no!
+
+#+ATTR_REVEAL: :frag appear
+For GUI applications: Snapcraft and Flatpak
+
+#+ATTR_REVEAL: :frag appear
+For CLI applications/services: containerd.io, podman, Fedora toolbox
+
+** In essence
+A container is a program running in namespaces that are defined as smaller than the host system, and runs in an execution environment as defined by the base image and runtime parameters
+
+#+ATTR_REVEAL: :frag appear
+Where does Docker fit in?
+* What is Docker?
+Relative to containerization, Docker is simple
+
+#+ATTR_REVEAL: :frag appear
+Docker is a service/daemon for configuring and running containerized applications as well as the interface to said daemon
+
+** What do services need that Docker provides for us?
+#+ATTR_REVEAL: :frag (appear appear appear appear appear)
+- Build
+- Image
+- Container
+- Network
+- Volumes
+
+*** We've seen building, images, and containers... what about networks?
+We can create a network with ~docker network create [NAME]~ and attach it to containers made with ~docker run~ using ~--network~
+
+#+ATTR_REVEAL: :frag appear
+[[file:examples/04-networks/]]
+
+#+ATTR_REVEAL: :frag appear
+After creating the network, we can make containers which can connect to the network and make themselves available to other containers in that network, and /only/ other containers in that network.
+**** Quick aside: make sure your Docker container exposes only to the network you want it to!
+*** And volumes?
+Volumes are where things get interesting, as they provide a way for containers to interact with filesystems outside their own
+
+They are mounted by using ~-v [volume-name]:[mount-point]~ with ~docker run~
+
+#+ATTR_REVEAL: :frag appear
+There are two primary volume types to worry about: Docker volumes, and bind mounts
+
+**** First, Docker volumes
+A special data structure which can be managed by the Docker daemon for you, and their paths look like the volume name
+
+**** More importantly: bind mounts
+What if we could just take a folder on our host systems and make it available inside the docker container?
+
+*** Docker daemon
+On top of allowing services to run, Docker also provides multiple management interfaces to manage contaienrs
+
+#+ATTR_REVEAL: :frag appear
+More specifically, a TCP socket and a Unix socket
+
+**** Security implications
+Do you remember where we specified the user in the earlier commands?
+
+#+ATTR_REVEAL: :frag appear
+We didn't! It defaults to ~root~!
+
+#+ATTR_REVEAL: :frag appear
+If someone has access to the Docker daemon, they can create containers with the root user if they so desire!
+
+#+ATTR_REVEAL: :frag appear
+Essentially, if someone tells you, "I have access to the Docker daemon, but I'm not root", they are lying or don't understand Docker
+* "This is cool and all... but what does it mean for me?"
+Docker can be very simple. But its usage and implications can become very complex, very fast
+
+** You can define safe, quarantined execution environments
+#+ATTR_REVEAL: :frag appear
+'Nuff said
+
+*** More specifically:
+If you have a binary that you can run on Linux, you can run it in a container
+
+[[file:examples/05-debugging/]]
+
+** You can define any Linux environment
+** You can specify the user you run container as
+** For Linux systems: you can provide access to host sockets
+What kind of sockets are there?
+
+#+ATTR_REVEAL: :frag (appear appear appear appear)
+- Docker (~/var/run/docker.sock~)
+- X11 (~/tmp/.X11-unix~)
+- SSH (~/tmp/ssh-xxxxxxxxxxxx/agent.xxxx~)
+- PulseAudio/PipeWire/ALSA etc.
+** Security vulnerabilities
+Have you heard of ~chroot~?
+
+#+ATTR_REVEAL: :frag appear
+If a Docker container isn't configured properly, using chroot you can gain access to your host
+
+*** Alternatively, bad socket use...
+[[file:examples/06-docker-socket]]
+** Popcorn: You specify any Linux program, I'll see if I can get it running in Docker!
+* Container orchestration
+#+ATTR_REVEAL: :frag (appear appear)
+- Docker compose
+- Kubernetes
+
+#+ATTR_REVEAL: :frag appear
+Why? Because running Docker commands ourselves is too difficult and boring
+
+#+ATTR_REVEAL: :frag appear
+It's a jump from "virtual machines" to "networks of virtual machines"
+
+** Docker compose
+Docker compose allows defining a ~docker-compose.yml~ service file
+
+#+ATTR_REVEAL: :frag appear
+#+BEGIN_SRC yaml
+version: '3.8'
+services:
+  mysql:
+    image: mysql
+    expose:
+      - '3306'
+
+  webapi:
+    image: your_company_webapi
+    environment:
+      - DB_HOST=mysql
+#+END_SRC
+
+*** Where's the security?
+What's the difference between these two configurations:
+
+#+ATTR_REVEAL: :frag appear
+#+BEGIN_SRC yaml
+version: '3.8'
+services:
+  mysql_1:
+    image: mysql
+    expose:
+      - '3306'
+
+  mysql_2:
+    image: mysql
+    ports:
+      - '3306:3306'
+#+END_SRC
+
+*** What's the difference between ~expose~ and ~ports~?
+[[file:images/docker-compose-network-2.png]]
+
+*** Can we still make problematic socket configurations?
+#+ATTR_REVEAL: :frag appear
+Yes
+** Kubernetes
+Kubernetes (k8s) is a program where you tell the Kubernetes API server: "create containers in this configuration"
+
+#+ATTR_REVEAL: :frag appear
+And if you have a well formed cluster and a sensible request, it will do so
+
+*** Another problem!
+Remember when we mentioned that if someone has access to the Docker daemon, they can create containers as any user, to include root?
+
+#+ATTR_REVEAL: :frag appear
+This may sound incredibly obvious, but...
+
+#+ATTR_REVEAL: :frag appear
+Kubernetes has access to the Docker daemon!
+
+#+ATTR_REVEAL: :frag appear
+By proxy, if someone has access to the Kubernetes API server, they have access to the Docker daemon
+
+* My challenges for you:
+- Create a MySQL database with the root password "toor"
+-

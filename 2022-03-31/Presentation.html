@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>LU CDC: Docker</title>
+<meta name="author" content="(Andrew Rioux)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.css"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/theme/moon.css" id="theme"/>
+
+<link rel="stylesheet" href="../common/theme.css"/>
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://cdn.jsdelivr.net/npm/reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide" data-background="../common/background.png"><h1>LU CDC: Docker</h1>
+Andrew Rioux (<a href="mailto:arioux@liberty.edu">arioux@liberty.edu</a>)
+</section>
+
+<section>
+<section id="slide-org4562718" data-background="../common/background.png">
+<h2 id="org4562718"><span class="section-number-2">1.</span> About me</h2>
+<ul>
+<li class="fragment appear">Andrew Rioux</li>
+<li class="fragment appear">CS: Software Engineering</li>
+<li class="fragment appear">Software Engineer for US Navy</li>
+<li class="fragment appear">LU CDC Vice President</li>
+<li class="fragment appear">Discord: Andrew#3967</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orge9aad9c" data-background="../common/background.png">
+<h2 id="orge9aad9c"><span class="section-number-2">2.</span> Presentation information</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+</section>
+<section id="slide-orgc80fdf6" data-background="../common/background.png">
+<h3 id="orgc80fdf6"><span class="section-number-3">2.1.</span> Located at the following git repository</h3>
+<p>
+<a href="https://github.com/r-a303931/lucdc-presentations">https://github.com/r-a303931/lucdc-presentations</a>
+</p>
+
+</section>
+<section id="slide-org6d1d43d" data-background="../common/background.png">
+<h3 id="org6d1d43d"><span class="section-number-3">2.2.</span> Please download Docker!</h3>
+<ul>
+<li>Windows: <a href="https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe">https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe</a></li>
+<li>Linux: <a href="https://docs.docker.com/engine/install/">https://docs.docker.com/engine/install/</a> (under &rsquo;Server&rsquo;)</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org000ae0b" data-background="../common/background.png">
+<h2 id="org000ae0b"><span class="section-number-2">3.</span> I love Docker!</h2>
+<p class="fragment appear">
+If you know of my love for Vim&#x2026; my love for Docker eclipses my love for Vim
+</p>
+
+<p class="fragment appear">
+Just like Vim has made me rethink how I use my keyboard&#x2026; Docker has made me rethink how I run programs!
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orge1ec803" data-background="../common/background.png">
+<h2 id="orge1ec803"><span class="section-number-2">4.</span> I have used Docker to:</h2>
+<ul>
+<li class="fragment appear">Run regular web services, its intended use</li>
+<li class="fragment appear">Run compilers and standardize development environments</li>
+<li class="fragment appear">Run graphical applications</li>
+<li class="fragment appear">Run graphical applications on Windows</li>
+<li class="fragment appear">Run a graphical application that was embedded in another graphical application over the network</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orga132bd3" data-background="../common/background.png">
+<h2 id="orga132bd3"><span class="section-number-2">5.</span> What we will be going over</h2>
+<ul>
+<li class="fragment appear">What is containerization</li>
+<li class="fragment appear">What is Docker</li>
+<li class="fragment appear">What can we use containerization for</li>
+<li class="fragment appear">Why is this important</li>
+<li class="fragment appear">Implications</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orge460d92" data-background="../common/background.png">
+<h2 id="orge460d92"><span class="section-number-2">6.</span> Docker is like Sudoku</h2>
+
+<div id="org28311a9" class="figure">
+<p><img src="images/sudoku.png" alt="sudoku.png" class="fragment appear" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgc8ec6dd" data-background="../common/background.png">
+<h2 id="orgc8ec6dd"><span class="section-number-2">7.</span> Problem:</h2>
+<p class="fragment appear">
+There are several problems with running computer programs that you may or may not have encountered
+</p>
+
+<ul>
+<li class="fragment appear">Ensuring consistency of software environments (enforcing standards)</li>
+<li class="fragment appear">Isolating program execution</li>
+<li class="fragment appear">Trust</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org47e3508" data-background="../common/background.png">
+<h2 id="org47e3508"><span class="section-number-2">8.</span> What is containerization?</h2>
+<p class="fragment appear">
+What is a program?
+</p>
+
+</section>
+<section id="slide-org203ed6d" data-background="../common/background.png">
+<h3 id="org203ed6d"><span class="section-number-3">8.1.</span> Containerization can be related to a regular program</h3>
+<p>
+You have a binary file and can run the binary file
+</p>
+
+<ul>
+<li class="fragment appear">Image: the binary file</li>
+<li class="fragment appear">Container: the running program</li>
+
+</ul>
+
+</section>
+<section id="slide-orgdbc12e1" data-background="../common/background.png">
+<h3 id="orgdbc12e1"><span class="section-number-3">8.2.</span> I only know C++! How do I make images?</h3>
+<p>
+Let&rsquo;s start with Hello World
+</p>
+
+</section>
+<section id="slide-org25027f2" data-background="../common/background.png">
+<h4 id="org25027f2"><span class="section-number-4">8.2.1.</span> Hello World C++</h4>
+<p>
+Let&rsquo;s start with Hello World in C++&#x2026;
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-cpp"   ><code trim><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #51afef;">&lt;</span><span style="color: #98be65;">iostream</span><span style="color: #51afef;">&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span><span style="color: #51afef;">()</span> <span style="color: #51afef;">{</span>
+    <span style="color: #a9a1e1;">std</span>::cout &lt;&lt; <span style="color: #98be65;">"Hello world!"</span> &lt;&lt; <span style="color: #a9a1e1;">std</span>::endl;
+<span style="color: #51afef;">}</span>
+</code></pre>
+</div>
+
+<p class="fragment appear">
+We can compile this by running <code>g++ helloworld.cpp</code> on Linux
+</p>
+
+<p class="fragment appear">
+<a href="examples/00-basic-cpp" class="fragment appear">examples/00-basic-cpp</a>
+</p>
+
+</section>
+<section id="slide-org9c17784" data-background="../common/background.png">
+<h4 id="org9c17784"><span class="section-number-4">8.2.2.</span> What does Docker need?</h4>
+<p>
+Docker runs like your Linux terminal
+</p>
+
+<p class="fragment appear">
+We can convert the ideas for running something in our shell to running it in Docker, so first let&rsquo;s translate &ldquo;Hello World!&rdquo; to Bash
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear"   ><code trim><span style="color: #ECBE7B;">echo</span> <span style="color: #98be65;">"Hello world!"</span>
+</code></pre>
+</div>
+
+<p class="fragment appear">
+<a href="examples/01-bash-basic" class="fragment appear">examples/01-bash-basic</a>
+</p>
+
+</section>
+<section id="slide-orge9e16ec" data-background="../common/background.png">
+<h4 id="orge9e16ec"><span class="section-number-4">8.2.3.</span> So, let&rsquo;s write our Dockerfile</h4>
+<div class="org-src-container">
+
+<pre  class="src src-dockerfile"   ><code trim><span style="color: #51afef;">FROM</span> <span style="color: #ECBE7B; font-weight: bold;">ubuntu</span>
+
+<span style="color: #51afef;">CMD</span> echo <span style="color: #98be65;">"Hello world!"</span>
+</code></pre>
+</div>
+
+<p class="fragment appear">
+<a href="examples/02-dockerfile-basic/" class="fragment appear">examples/02-dockerfile-basic/</a>
+</p>
+
+<p class="fragment appear">
+We can build it with <code>docker build -t hello-world .</code>
+</p>
+
+<p class="fragment appear">
+Where did it go?
+</p>
+
+<p class="fragment appear">
+We can run it with <code>docker run hello-world</code>
+</p>
+</section>
+<section id="slide-org6c58b8f" data-background="../common/background.png">
+<h4 id="org6c58b8f"><span class="section-number-4">8.2.4.</span> So&#x2026; what did this do?</h4>
+<p class="fragment appear">
+That&rsquo;s the what, but what about the &rsquo;why&rsquo; and &rsquo;how&rsquo;?
+</p>
+</section>
+<section id="slide-orge308c3c" data-background="../common/background.png">
+<h3 id="orge308c3c"><span class="section-number-3">8.3.</span> Stepping back for a moment&#x2026;</h3>
+<p>
+How is it that Linux computers <i>work</i>? How do they boot?
+</p>
+
+<p class="fragment appear">
+Condensed version: a bootloader runs the kernel, and the kernel runs a program, the init program
+</p>
+
+<p class="fragment appear">
+What is the init program?
+</p>
+
+<p class="fragment appear">
+What happens if you replace this init process with something else, something trivial like <code>echo Hello World!</code>?
+</p>
+
+</section>
+<section id="slide-orgf1e896c" data-background="../common/background.png">
+<h3 id="orgf1e896c"><span class="section-number-3">8.4.</span> Containers are like Virtual Machines</h3>
+<p class="fragment appear">
+We just skip loading the kernel and replace the init program!
+</p>
+
+</section>
+<section id="slide-orgb0ccd38" data-background="../common/background.png">
+<h4 id="orgb0ccd38"><span class="section-number-4">8.4.1.</span> But virtual machines are really secure!</h4>
+<p>
+Each virtual machine gets its own:
+</p>
+<ul>
+<li class="fragment appear">Network configuration</li>
+<li class="fragment appear">File system</li>
+<li class="fragment appear">Running programs</li>
+<li class="fragment appear">Hostname</li>
+
+</ul>
+
+<p class="fragment appear">
+Can we emulate anything like that for other programs?
+Something more&#x2026; performant?
+</p>
+
+</section>
+<section id="slide-org018f359" data-background="../common/background.png">
+<h4 id="org018f359"><span class="section-number-4">8.4.2.</span> Yes!</h4>
+</section>
+<section id="slide-orga3c231d" data-background="../common/background.png">
+<h4 id="orga3c231d"><span class="section-number-4">8.4.3.</span> Enter Containers and Namespaces</h4>
+<p class="fragment appear">
+What kind of containing can we do with the Linux kernel?
+</p>
+
+<p class="fragment appear">
+The Linux kernel has the following namespaces:
+</p>
+
+<ul>
+<li class="fragment appear">Mount (file systems)</li>
+<li class="fragment appear">Process ID (running programs)</li>
+<li class="fragment appear">Network</li>
+<li class="fragment appear">Interprocess Communication (IPC)</li>
+<li class="fragment appear">UTS (hostname)</li>
+<li class="fragment appear">User ID</li>
+<li class="fragment appear">Control group</li>
+<li class="fragment appear">Time</li>
+
+</ul>
+
+</section>
+<section id="slide-org3de65a7" data-background="../common/background.png">
+<h4 id="org3de65a7"><span class="section-number-4">8.4.4.</span> Containers are ephemeral</h4>
+<p class="fragment appear">
+<i>No changes you make are saved</i>
+</p>
+
+</section>
+<section id="slide-orgffed91a" data-background="../common/background.png">
+<h3 id="orgffed91a"><span class="section-number-3">8.5.</span> That&rsquo;s cool&#x2026; but virtualization has a performance penalty</h3>
+<p>
+Yes.
+</p>
+
+<p class="fragment appear">
+However&#x2026;
+</p>
+
+<p class="fragment appear">
+Containers aren&rsquo;t virtualization!
+</p>
+
+</section>
+<section id="slide-org704a04a" data-background="../common/background.png">
+<h4 id="org704a04a"><span class="section-number-4">8.5.1.</span> Simple comparison: Ubuntu container vs Arch VM</h4>
+</section>
+<section id="slide-orgcc0f95b" data-background="../common/background.png">
+<h3 id="orgcc0f95b"><span class="section-number-3">8.6.</span> Programs running in Linux containers exist on their host systems</h3>
+<p>
+They are running directly on the host computer, just limited
+</p>
+</section>
+<section id="slide-orgd214a9f" data-background="../common/background.png">
+<h3 id="orgd214a9f"><span class="section-number-3">8.7.</span> Do we need Docker in order to manage containers?</h3>
+<p class="fragment appear">
+Actually, no!
+</p>
+
+<p class="fragment appear">
+For GUI applications: Snapcraft and Flatpak
+</p>
+
+<p class="fragment appear">
+For CLI applications/services: containerd.io, podman, Fedora toolbox
+</p>
+
+</section>
+<section id="slide-org67c4ebf" data-background="../common/background.png">
+<h3 id="org67c4ebf"><span class="section-number-3">8.8.</span> In essence</h3>
+<p>
+A container is a program running in namespaces that are defined as smaller than the host system, and runs in an execution environment as defined by the base image and runtime parameters
+</p>
+
+<p class="fragment appear">
+Where does Docker fit in?
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org0df8f8c" data-background="../common/background.png">
+<h2 id="org0df8f8c"><span class="section-number-2">9.</span> What is Docker?</h2>
+<p>
+Relative to containerization, Docker is simple
+</p>
+
+<p class="fragment appear">
+Docker is a service/daemon for configuring and running containerized applications as well as the interface to said daemon
+</p>
+
+</section>
+<section id="slide-org11cc9be" data-background="../common/background.png">
+<h3 id="org11cc9be"><span class="section-number-3">9.1.</span> What do services need that Docker provides for us?</h3>
+<ul>
+<li class="fragment appear">Build</li>
+<li class="fragment appear">Image</li>
+<li class="fragment appear">Container</li>
+<li class="fragment appear">Network</li>
+<li class="fragment appear">Volumes</li>
+
+</ul>
+
+</section>
+<section id="slide-org79342c2" data-background="../common/background.png">
+<h4 id="org79342c2"><span class="section-number-4">9.1.1.</span> We&rsquo;ve seen building, images, and containers&#x2026; what about networks?</h4>
+<p>
+We can create a network with <code>docker network create [NAME]</code> and attach it to containers made with <code>docker run</code> using <code>--network</code>
+</p>
+
+<p class="fragment appear">
+<a href="examples/03-networks/" class="fragment appear">examples/03-networks/</a>
+</p>
+
+<p class="fragment appear">
+After creating the network, we can make containers which can connect to the network and make themselves available to other containers in that network, and <i>only</i> other containers in that network.
+</p>
+<ol class="org-ol">
+<li><a id="org2f55da8"></a>Quick aside: make sure your Docker container exposes only to the network you want it to!<br /></li>
+</ol>
+</section>
+<section id="slide-org0cf8e8b" data-background="../common/background.png">
+<h4 id="org0cf8e8b"><span class="section-number-4">9.1.2.</span> And volumes?</h4>
+<p>
+Volumes are where things get interesting, as they provide a way for containers to interact with filesystems outside their own
+</p>
+
+<p>
+They are mounted by using <code>-v [volume-name]:[mount-point]</code> with <code>docker run</code>
+</p>
+
+<p class="fragment appear">
+There are two primary volume types to worry about: Docker volumes, and bind mounts
+</p>
+
+<ol class="org-ol">
+<li><a id="org1e9bc54"></a>First, Docker volumes<br />
+<p>
+A special data structure which can be managed by the Docker daemon for you, and their paths look like the volume name
+</p>
+</li>
+
+<li><a id="org9c9c807"></a>More importantly: bind mounts<br />
+<p>
+What if we could just take a folder on our host systems and make it available inside the docker container?
+</p>
+</li>
+</ol>
+
+</section>
+<section id="slide-org077ebe0" data-background="../common/background.png">
+<h4 id="org077ebe0"><span class="section-number-4">9.1.3.</span> Docker daemon</h4>
+<p>
+On top of allowing services to run, Docker also provides multiple management interfaces to manage contaienrs
+</p>
+
+<p class="fragment appear">
+More specifically, a TCP socket and a Unix socket
+</p>
+
+<ol class="org-ol">
+<li><a id="org6cf5425"></a>Security implications<br />
+<p>
+Do you remember where we specified the user in the earlier commands?
+</p>
+
+<p class="fragment appear">
+We didn&rsquo;t! It defaults to <code>root</code>!
+</p>
+
+<p class="fragment appear">
+If someone has access to the Docker daemon, they can create containers with the root user if they so desire!
+</p>
+
+<p class="fragment appear">
+Essentially, if someone tells you, &ldquo;I have access to the Docker daemon, but I&rsquo;m not root&rdquo;, they are lying or don&rsquo;t understand Docker
+</p>
+</li>
+</ol>
+</section>
+</section>
+<section>
+<section id="slide-org0e94c7f" data-background="../common/background.png">
+<h2 id="org0e94c7f"><span class="section-number-2">10.</span> &ldquo;This is cool and all&#x2026; but what does it mean for me?&rdquo;</h2>
+<p>
+Docker can be very simple. But its usage and implications can become very complex, very fast
+</p>
+
+</section>
+<section id="slide-org15c0d87" data-background="../common/background.png">
+<h3 id="org15c0d87"><span class="section-number-3">10.1.</span> You can define safe, quarantined execution environments</h3>
+<p class="fragment appear">
+&rsquo;Nuff said
+</p>
+
+</section>
+<section id="slide-org6d1df59" data-background="../common/background.png">
+<h4 id="org6d1df59"><span class="section-number-4">10.1.1.</span> More specifically:</h4>
+<p>
+If you have a binary that you can run on Linux, you can run it in a container
+</p>
+
+<p>
+<a href="examples/04-debugging/">examples/04-debugging/</a>
+</p>
+
+</section>
+<section id="slide-org55c0a9d" data-background="../common/background.png">
+<h3 id="org55c0a9d"><span class="section-number-3">10.2.</span> You can define any Linux environment</h3>
+</section>
+<section id="slide-org0d7c1b3" data-background="../common/background.png">
+<h3 id="org0d7c1b3"><span class="section-number-3">10.3.</span> You can specify the user you run container as</h3>
+</section>
+<section id="slide-orgf177e7f" data-background="../common/background.png">
+<h3 id="orgf177e7f"><span class="section-number-3">10.4.</span> For Linux systems: you can provide access to host sockets</h3>
+<p>
+What kind of sockets are there?
+</p>
+
+<ul>
+<li class="fragment appear">Docker (<code>/var/run/docker.sock</code>)</li>
+<li class="fragment appear">X11 (<code>/tmp/.X11-unix</code>)</li>
+<li class="fragment appear">SSH (<code>/tmp/ssh-xxxxxxxxxxxx/agent.xxxx</code>)</li>
+<li class="fragment appear">PulseAudio/PipeWire/ALSA etc.</li>
+
+</ul>
+</section>
+<section id="slide-org9824fad" data-background="../common/background.png">
+<h3 id="org9824fad"><span class="section-number-3">10.5.</span> Security vulnerabilities</h3>
+<p>
+Have you heard of <code>chroot</code>?
+</p>
+
+<p class="fragment appear">
+If a Docker container isn&rsquo;t configured properly, using chroot you can gain access to your host
+</p>
+
+</section>
+<section id="slide-org3c4fd15" data-background="../common/background.png">
+<h4 id="org3c4fd15"><span class="section-number-4">10.5.1.</span> Alternatively, bad socket use&#x2026;</h4>
+<p>
+<a href="examples/05-docker-socket">examples/05-docker-socket</a>
+</p>
+</section>
+<section id="slide-orge717b9d" data-background="../common/background.png">
+<h3 id="orge717b9d"><span class="section-number-3">10.6.</span> Popcorn: You specify any Linux program, I&rsquo;ll see if I can get it running in Docker!</h3>
+</section>
+</section>
+<section>
+<section id="slide-org196cd3d" data-background="../common/background.png">
+<h2 id="org196cd3d"><span class="section-number-2">11.</span> Container orchestration</h2>
+<ul>
+<li class="fragment appear">Docker compose</li>
+<li class="fragment appear">Kubernetes</li>
+
+</ul>
+
+<p class="fragment appear">
+Why? Because running Docker commands ourselves is too difficult and boring
+</p>
+
+</section>
+<section id="slide-org393cf36" data-background="../common/background.png">
+<h3 id="org393cf36"><span class="section-number-3">11.1.</span> Docker compose</h3>
+<p>
+Docker compose allows defining a <code>docker-compose.yml</code> service file
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear"   ><code trim><span style="color: #dcaeea;">version</span>: <span style="color: #98be65;">'3.8'</span>
+<span style="color: #dcaeea;">services</span>:
+  <span style="color: #dcaeea;">mysql</span>:
+    <span style="color: #dcaeea;">image</span>: mysql
+    <span style="color: #dcaeea;">expose</span>:
+      - <span style="color: #98be65;">'3306'</span>
+
+  <span style="color: #dcaeea;">webapi</span>:
+    <span style="color: #dcaeea;">image</span>: your_company_webapi
+    <span style="color: #dcaeea;">environment</span>:
+      - DB_HOST=mysql
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org92bfb62" data-background="../common/background.png">
+<h3 id="org92bfb62"><span class="section-number-3">11.2.</span> Kubernetes</h3>
+<p>
+Kubernetes (k8s) is a program where you tell the Kubernetes API server: &ldquo;create containers in this configuration&rdquo;
+</p>
+
+<p class="fragment appear">
+And if you have a well formed cluster and a sensible request, it will do so
+</p>
+
+</section>
+<section id="slide-org7c4c20f" data-background="../common/background.png">
+<h3 id="org7c4c20f"><span class="section-number-3">11.3.</span> This could be useful to know</h3>
+<p>
+What&rsquo;s the difference between these two configurations:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment appear"   ><code trim><span style="color: #dcaeea;">version</span>: <span style="color: #98be65;">'3.8'</span>
+<span style="color: #dcaeea;">services</span>:
+  <span style="color: #dcaeea;">mysql_1</span>:
+    <span style="color: #dcaeea;">image</span>: mysql
+    <span style="color: #dcaeea;">expose</span>:
+      - <span style="color: #98be65;">'3306'</span>
+
+  <span style="color: #dcaeea;">mysql_2</span>:
+    <span style="color: #dcaeea;">image</span>: mysql
+    <span style="color: #dcaeea;">ports</span>:
+      - <span style="color: #98be65;">'3306:3306'</span>
+</code></pre>
+</div>
+</section>
+<section id="slide-orgbc35d40" data-background="../common/background.png">
+<h3 id="orgbc35d40"><span class="section-number-3">11.4.</span> Another problem!</h3>
+<p>
+Remember when we mentioned that if someone has access to the Docker daemon, they can create containers as any user, to include root?
+</p>
+
+<p class="fragment appear">
+This may sound incredibly obvious, but&#x2026;
+</p>
+
+<p class="fragment appear">
+Kubernetes has access to the Docker daemon!
+</p>
+
+<p class="fragment appear">
+By proxy, if someone has access to the Kubernetes API server, they have access to the Docker daemon
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgfb3523f" data-background="../common/background.png">
+<h2 id="orgfb3523f"><span class="section-number-2">12.</span> My challenge to you:</h2>
+<div class="outline-text-2" id="text-12">
+</div>
+</section>
+<section id="slide-org8288cda" data-background="../common/background.png">
+<h3 id="org8288cda"><span class="section-number-3">12.1.</span> Create a database using the Docker daemon</h3>
+</section>
+<section id="slide-orgd48380f" data-background="../common/background.png">
+<h3 id="orgd48380f"><span class="section-number-3">12.2.</span> Configure this docker compose service properly to fix this problem</h3>
+</section>
+<section id="slide-org61634c6" data-background="../common/background.png">
+<h3 id="org61634c6"><span class="section-number-3">12.3.</span> Configure this Kubernetes cluster to fix the issue that is present with this container</h3>
+</section>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+transition: 'none',
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'https://cdn.jsdelivr.net/npm/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+
+});
+
+</script>
+</body>
+</html>
